@@ -104,12 +104,7 @@ export default function Dashboard() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <img src="/logo.png" alt="Logo" style={{ height: '50px' }} />
-            {currentOrg && (
-                <div style={{ color: 'var(--text-main)', fontWeight: '600', fontSize: '1.2rem' }}>
-                    {currentOrg.name}
-                </div>
-            )}
+            <img src="/logo.png" alt="Logo" style={{ height: '40px' }} onClick={() => navigate('/')} className="cursor-pointer" />
           </div>
           
           {/* Org Selector */}
@@ -130,23 +125,49 @@ export default function Dashboard() {
         <div style={{ display: 'flex', gap: '1rem' }}>
             {(userProfile.role === 'superadmin' || userProfile.role === 'admin') && (
                 <>
-                    <button className="btn" style={{ background: 'rgba(255,255,255,0.1)' }} onClick={() => setShowCreateOrg(true)}>
+                    <button className="btn" style={{ background: 'rgba(0,0,0,0.05)', fontSize: '0.875rem' }} onClick={() => setShowCreateOrg(true)}>
                         + New Org
                     </button>
                     {currentOrg && (
-                        <button className="btn" style={{ background: 'rgba(255,255,255,0.1)' }} onClick={() => setShowSettings(true)}>
+                        <button className="btn" style={{ background: 'rgba(0,0,0,0.05)', fontSize: '0.875rem' }} onClick={() => setShowSettings(true)}>
                             ⚙ Settings
                         </button>
                     )}
                 </>
             )}
-            <button className="btn" onClick={handleLogout} style={{ background: 'rgba(255,255,255,0.1)' }}>
+            <button className="btn" onClick={handleLogout} style={{ background: 'rgba(0,0,0,0.05)', fontSize: '0.875rem' }}>
             Logout
             </button>
         </div>
       </header>
 
       <main>
+        {/* Branding Hero Section */}
+        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <img src="/logo.png" alt="Wisdom Logo" style={{ height: '80px', marginBottom: '1.5rem', display: 'block', margin: '0 auto 1.5rem' }} />
+            
+            {/* Breadcrumbs */}
+            <nav style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                gap: '0.75rem', 
+                fontSize: '0.75rem', 
+                color: 'var(--text-muted)', 
+                textTransform: 'uppercase', 
+                letterSpacing: '0.1em',
+                fontWeight: '600'
+            }}>
+                <span className="cursor-pointer" style={{ transition: 'color 0.2s' }} onClick={() => setCurrentOrg(null)}>Dashboard</span>
+                {currentOrg && (
+                    <>
+                        <span style={{ opacity: 0.5 }}>/</span>
+                        <span style={{ color: 'var(--text-main)' }}>{currentOrg.name}</span>
+                    </>
+                )}
+            </nav>
+        </div>
+
         {!currentOrg ? (
             <div className="text-center">
                 <h3>Select an Organization to view forms</h3>
@@ -160,7 +181,7 @@ export default function Dashboard() {
         ) : (
             <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                    <h3>Forms</h3>
+                    <h3 style={{ fontSize: '1.5rem' }}>Forms</h3>
                     <button className="btn btn-primary" onClick={() => navigate('/builder')}>
                         + Create New Form
                     </button>
