@@ -78,9 +78,12 @@ export default function Dashboard() {
         borderBottom: '1px solid var(--glass-border)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>Dashboard</h2>
-            {currentOrg && <div style={{ color: 'var(--primary-color)', fontWeight: '600' }}>{currentOrg.name}</div>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <img src="/logo.png" alt="Logo" style={{ height: '40px' }} />
+            <div>
+              <h2 style={{ fontSize: '1.5rem', marginBottom: '0.25rem', color: 'var(--text-main)' }}>Dashboard</h2>
+              {currentOrg && <div style={{ color: 'var(--text-muted)', fontWeight: '500', fontSize: '0.9rem' }}>{currentOrg.name}</div>}
+            </div>
           </div>
           
           {/* Org Selector */}

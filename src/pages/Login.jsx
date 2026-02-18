@@ -27,6 +27,7 @@ export default function Login() {
   return (
     <div className="flex-center" style={{ minHeight: '100vh' }}>
       <div className="glass-panel text-center" style={{ maxWidth: '400px', width: '90%' }}>
+        <img src="/logo.png" alt="Wisdom Forms" style={{ height: '60px', marginBottom: '1.5rem' }} />
         <h1 style={{ marginBottom: '1.5rem' }}>Welcome to Wisdom Forms</h1>
         <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
           Create and manage organizational forms with ease and style.

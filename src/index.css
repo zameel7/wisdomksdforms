@@ -1,13 +1,13 @@
 :root {
-  --primary-color: #6366f1; /* Indigo 500 */
-  --primary-hover: #4f46e5; /* Indigo 600 */
-  --secondary-color: #ec4899; /* Pink 500 */
-  --background-start: #0f172a; /* Slate 900 */
-  --background-end: #1e293b; /* Slate 800 */
-  --text-main: #f8fafc; /* Slate 50 */
-  --text-muted: #94a3b8; /* Slate 400 */
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --primary-color: #000000; /* Black */
+  --primary-hover: #333333; /* Dark Gray */
+  --secondary-color: #ec4899; /* Pink 500 - keeping as accent */
+  --background-start: #ffffff; /* White */
+  --background-end: #f8fafc; /* Very light slate */
+  --text-main: #0f172a; /* Slate 900 */
+  --text-muted: #64748b; /* Slate 500 */
+  --glass-bg: rgba(255, 255, 255, 0.7); /* More opaque for light mode */
+  --glass-border: rgba(0, 0, 0, 0.1);
   --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;

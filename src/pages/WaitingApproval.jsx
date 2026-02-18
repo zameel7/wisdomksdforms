@@ -13,6 +13,7 @@ export default function WaitingApproval() {
   return (
     <div className="flex-center" style={{ minHeight: '100vh' }}>
       <div className="glass-panel text-center" style={{ maxWidth: '500px', width: '90%' }}>
+        <img src="/logo.png" alt="Wisdom Forms" style={{ height: '50px', marginBottom: '1rem' }} />
         <h2 style={{ marginBottom: '1rem' }}>Account Pending Approval</h2>
         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
         <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: '1.6' }}>

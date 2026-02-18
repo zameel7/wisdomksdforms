@@ -58,7 +58,10 @@ export default function PublicCatalog() {
         paddingBottom: '1rem',
         borderBottom: '1px solid var(--glass-border)'
       }}>
-        <h1>Wisdom Forms</h1>
+        <h1>
+            <img src="/logo.png" alt="Wisdom Forms Logo" style={{ height: '40px', verticalAlign: 'middle', marginRight: '10px' }} />
+            Wisdom Forms
+        </h1>
         <Link to="/login" className="btn" style={{ background: 'rgba(255,255,255,0.1)' }}>Admin Login</Link>
       </header>
 
