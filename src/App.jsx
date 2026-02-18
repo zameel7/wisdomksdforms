@@ -5,7 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import FormBuilder from "./pages/FormBuilder";
 import WaitingApproval from "./pages/WaitingApproval";
 import PublicCatalog from "./pages/PublicCatalog";
-import PublicCatalog from "./pages/PublicCatalog";
+
 import PublicFormView from "./pages/PublicFormView";
 import FormResponses from "./pages/FormResponses";
 import AdminGuard from "./components/AdminGuard";
