@@ -1,0 +1,60 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper to get user profile
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // Helper to check if user is superadmin
+    function isSuperAdmin() {
+      return isAuthenticated() && getUserData().role == 'superadmin';
+    }
+
+    // Helper to check if user is admin of the specific org
+    function isOrgAdmin(orgId) {
+      // Assuming users have organizationIds array or can check directly
+      // Adjust based on your exact schema choice. 
+      // Current implementation: User profile has 'organizationIds' (array) or we check logic.
+      // Since we implemented userProfile.organizationIds containing org IDs:
+      let user = getUserData();
+      return isAuthenticated() && (user.role == 'superadmin' || (user.role == 'admin' && orgId in user.organizationIds));
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin(); // Only superadmin can change roles manually for now (or via Console)
+      allow create: if isAuthenticated() && request.auth.uid == userId; // specific rule for initial creation on login
+    }
+
+    // Organizations
+    match /organizations/{orgId} {
+      allow read: if true; // Public needs to read org info for forms? Maybe just slug.
+      // Admin dashboard needs read. 
+      // Let's restrict:
+      // allow read: if true; // For now public finding forms might need org details.
+      
+      allow create, update: if isSuperAdmin();
+    }
+
+    // Forms
+    match /forms/{formId} {
+      allow read: if true; // Public must read forms to render them
+      allow create, update, delete: if isOrgAdmin(request.resource.data.orgId);
+    }
+
+    // Responses
+    match /responses/{responseId} {
+      allow create: if true; // Public submission
+      allow read: if isOrgAdmin(resource.data.orgId) || isOrgAdmin(get(/databases/$(database)/documents/forms/$(resource.data.formId)).data.orgId);
+    }
+  }
+}
