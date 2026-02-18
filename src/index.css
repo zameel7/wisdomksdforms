@@ -90,18 +90,69 @@ a:hover {
 
 .input-field {
   width: 100%;
-  padding: 0.75rem;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--glass-border);
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
   border-radius: var(--radius-md);
   color: var(--text-main);
   font-size: 1rem;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-field:hover {
+  border-color: #cbd5e1;
 }
 
 .input-field:focus {
   outline: none;
   border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+}
+
+.input-field::placeholder {
+  color: #94a3b8;
+}
+
+/* Editable title style - clear input affordance */
+.input-field--title {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #e2e8f0;
+  border-radius: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.input-field--title:hover {
+  border-bottom-color: #cbd5e1;
+}
+
+.input-field--title:focus {
+  border-bottom-color: var(--primary-color);
+  box-shadow: none;
+}
+
+select.input-field {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.5rem;
+}
+
+input[type="file"] {
+  padding: 0.5rem 1rem;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+input[type="file"]:hover {
+  border-color: #cbd5e1;
 }
 
 .flex-center {

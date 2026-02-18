@@ -18,49 +18,75 @@ service cloud.firestore {
       return isAuthenticated() && getUserData().role == 'superadmin';
     }
 
+    // Helper to check if user is member of the specific org (organizations map or legacy organizationIds)
+    function isOrgMember(orgId) {
+      let user = getUserData();
+      return isAuthenticated() && (
+        user.role == 'superadmin' ||
+        (user.organizations != null && orgId in user.organizations) ||
+        (user.organizationIds != null && orgId in user.organizationIds)
+      );
+    }
+
     // Helper to check if user is admin of the specific org
     function isOrgAdmin(orgId) {
-      // Assuming users have organizationIds array or can check directly
-      // Adjust based on your exact schema choice. 
-      // Current implementation: User profile has 'organizationIds' (array) or we check logic.
-      // Since we implemented userProfile.organizationIds containing org IDs:
       let user = getUserData();
-      return isAuthenticated() && (user.role == 'superadmin' || (user.role == 'admin' && orgId in user.organizationIds));
+      return isAuthenticated() && (
+        user.role == 'superadmin' ||
+        (user.organizations != null && orgId in user.organizations && user.organizations[orgId] == 'admin') ||
+        (user.organizationIds != null && orgId in user.organizationIds && user.role == 'admin')
+      );
+    }
+
+    // Helper to check if user can create orgs (superadmin or has org admin role)
+    function canCreateOrg() {
+      let user = getUserData();
+      return isSuperAdmin() ||
+        (user.role == 'admin') ||
+        (user.hasOrgAdminRole == true);
     }
 
     // Users collection
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update: if isSuperAdmin() || (isAuthenticated() && request.auth.uid == userId && request.resource.data.role == resource.data.role);
+      // Allow update: superadmin, or self (preserving role, or adding organizations from invite)
+      allow update: if isSuperAdmin() ||
+        (isAuthenticated() && request.auth.uid == userId && (
+          request.resource.data.role == resource.data.role ||
+          request.resource.data.organizations != null
+        ));
     }
 
     // Organizations
     match /organizations/{orgId} {
       allow read: if true; 
-      allow create: if isSuperAdmin() || (isAuthenticated() && getUserData().role == 'admin');
-      
-      // Allow updates if superadmin OR if user is an admin for this specific org
-      // This covers updating imgbbApiKey or other settings
-      allow update: if isSuperAdmin() || (isAuthenticated() && 
-         getUserData().role == 'admin' && 
-         (
-             // Check if orgId is in the user's assigned organizations
-             orgId in getUserData().organizationIds
-         )
-      );
+      allow create: if canCreateOrg();
+      allow update: if isOrgAdmin(orgId);
     }
 
-    // Forms
+    // Org members - invitations and membership
+    match /orgMembers/{memberId} {
+      allow create: if isOrgAdmin(request.resource.data.orgId);
+      allow read: if isOrgAdmin(resource.data.orgId) ||
+        (resource.data.email == request.auth.token.email);
+      allow update: if resource.data.status == 'pending' &&
+        resource.data.email == request.auth.token.email;
+      allow delete: if isOrgAdmin(resource.data.orgId);
+    }
+
+    // Forms - both admin and user can create/edit/delete
     match /forms/{formId} {
       allow read: if true; // Public must read forms to render them
-      allow create, update, delete: if isOrgAdmin(request.resource.data.orgId);
+      allow create: if isOrgMember(request.resource.data.orgId);
+      allow update, delete: if isOrgMember(resource.data.orgId);
     }
 
-    // Responses
+    // Responses - both admin and user can read
     match /responses/{responseId} {
       allow create: if true; // Public submission
-      allow read: if isOrgAdmin(resource.data.orgId) || isOrgAdmin(get(/databases/$(database)/documents/forms/$(resource.data.formId)).data.orgId);
+      allow read: if isOrgMember(resource.data.orgId) ||
+        isOrgMember(get(/databases/$(database)/documents/forms/$(resource.data.formId)).data.orgId);
     }
   }
 }

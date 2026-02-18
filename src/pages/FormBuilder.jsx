@@ -149,8 +149,8 @@ export default function FormBuilder() {
         <div className="glass-panel p-4">
           <input 
             type="text" 
-            className="input-field" 
-            style={{ fontSize: '2rem', fontWeight: 'bold', border: 'none', background: 'transparent', padding: 0 }}
+            className="input-field input-field--title" 
+            style={{ fontSize: '2rem', fontWeight: 'bold' }}
             value={formTitle}
             onChange={(e) => setFormTitle(e.target.value)}
             placeholder="Form Title"
@@ -183,7 +183,7 @@ export default function FormBuilder() {
                     onChange={(e) => setLogoUrl(e.target.value)}
                     placeholder="https://..."
                 />
-                <input type="file" onChange={handleLogoUpload} className="mt-2" />
+                <input type="file" accept="image/*" onChange={handleLogoUpload} className="mt-2" />
             </div>
           </div>
           <div className="mt-4 flex items-center gap-2">
@@ -234,9 +234,10 @@ export default function FormBuilder() {
                     <input 
                       type="text" 
                       className="input-field" 
-                      style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--glass-border)' }}
+                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.9rem' }}
                       value={option}
                       onChange={(e) => updateOption(field.id, optIndex, e.target.value)}
+                      placeholder="Option"
                     />
                     <button className="btn" style={{ padding: '0.25rem 0.5rem' }} onClick={() => removeOption(field.id, optIndex)}>×</button>
                   </div>

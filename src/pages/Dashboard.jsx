@@ -9,7 +9,10 @@ import { db } from "../firebase";
 
 export default function Dashboard() {
   const { logout, userProfile } = useAuth();
-  const { organizations, currentOrg, setCurrentOrg, loading: orgsLoading, createOrganization } = useOrganizations();
+  const { organizations, currentOrg, setCurrentOrg, loading: orgsLoading, createOrganization, isOrgAdmin } = useOrganizations();
+
+  const canCreateOrg = userProfile?.role === "superadmin" || userProfile?.role === "admin" || userProfile?.hasOrgAdminRole;
+  const showOrgAdminActions = currentOrg && (userProfile?.role === "superadmin" || isOrgAdmin(currentOrg.id));
   const navigate = useNavigate();
   const [showCreateOrg, setShowCreateOrg] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -58,10 +61,8 @@ export default function Dashboard() {
     return <div className="flex-center" style={{ minHeight: '100vh' }}>Loading...</div>;
   }
 
-  // If no organizations (and not superadmin), show empty state
-  // If no organizations, show create option or empty state
   if (organizations.length === 0) {
-      if (userProfile.role === 'superadmin' || userProfile.role === 'admin') {
+      if (canCreateOrg) {
           return (
             <div className="container flex-center" style={{ minHeight: '100vh', flexDirection: 'column' }}>
                 <img src="/logo.png" alt="Logo" style={{ height: '60px', marginBottom: '1.5rem' }} />
@@ -123,17 +124,15 @@ export default function Dashboard() {
         </div>
 
         <div style={{ display: 'flex', gap: '1rem' }}>
-            {(userProfile.role === 'superadmin' || userProfile.role === 'admin') && (
-                <>
-                    <button className="btn" style={{ background: 'rgba(0,0,0,0.05)', fontSize: '0.875rem' }} onClick={() => setShowCreateOrg(true)}>
-                        + New Org
-                    </button>
-                    {currentOrg && (
-                        <button className="btn" style={{ background: 'rgba(0,0,0,0.05)', fontSize: '0.875rem' }} onClick={() => setShowSettings(true)}>
-                            ⚙ Settings
-                        </button>
-                    )}
-                </>
+            {canCreateOrg && (
+                <button className="btn" style={{ background: 'rgba(0,0,0,0.05)', fontSize: '0.875rem' }} onClick={() => setShowCreateOrg(true)}>
+                    + New Org
+                </button>
+            )}
+            {showOrgAdminActions && (
+                <button className="btn" style={{ background: 'rgba(0,0,0,0.05)', fontSize: '0.875rem' }} onClick={() => setShowSettings(true)}>
+                    ⚙ Settings
+                </button>
             )}
             <button className="btn" onClick={handleLogout} style={{ background: 'rgba(0,0,0,0.05)', fontSize: '0.875rem' }}>
             Logout

@@ -2,15 +2,25 @@ import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
+function hasOrgMembership(userProfile) {
+  if (!userProfile) return false;
+  if (userProfile.role === "superadmin") return true;
+  const orgIds =
+    userProfile.organizations && typeof userProfile.organizations === "object"
+      ? Object.keys(userProfile.organizations)
+      : userProfile.organizationIds || [];
+  return orgIds.length > 0;
+}
+
 export default function Login() {
   const { login, currentUser, userProfile } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (currentUser && userProfile) {
-      if (userProfile.role === 'admin' || userProfile.role === 'superadmin') {
+      if (hasOrgMembership(userProfile)) {
         navigate("/dashboard");
-      } else if (userProfile.role === 'pending') {
+      } else {
         navigate("/waiting-approval");
       }
     }

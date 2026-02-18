@@ -1,12 +1,44 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db, googleProvider } from "../firebase";
 import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp, onSnapshot, collection, query, where, getDocs } from "firebase/firestore";
 
 const AuthContext = createContext();
 
 export function useAuth() {
   return useContext(AuthContext);
+}
+
+async function processPendingInvitations(user) {
+  if (!user?.email) return;
+  const invitationsQuery = query(
+    collection(db, "orgMembers"),
+    where("email", "==", user.email),
+    where("status", "==", "pending")
+  );
+  const snapshot = await getDocs(invitationsQuery);
+  if (snapshot.empty) return;
+
+  const userRef = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userRef);
+  const existingOrgs = userSnap.exists() ? (userSnap.data().organizations || {}) : {};
+
+  const updates = {};
+  for (const invDoc of snapshot.docs) {
+    const { orgId, role } = invDoc.data();
+    updates[orgId] = role;
+    await updateDoc(doc(db, "orgMembers", invDoc.id), {
+      userId: user.uid,
+      status: "active",
+    });
+  }
+
+  const newOrgs = { ...existingOrgs, ...updates };
+  const hasOrgAdminRole = Object.values(newOrgs).includes("admin");
+  await updateDoc(userRef, {
+    organizations: newOrgs,
+    ...(hasOrgAdminRole && { hasOrgAdminRole: true }),
+  });
 }
 
 export function AuthProvider({ children }) {
@@ -18,25 +50,27 @@ export function AuthProvider({ children }) {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
-      
-      // Check if user exists in Firestore
+
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
-        // Create new user with pending role
         const newProfile = {
           uid: user.uid,
           email: user.email,
           displayName: user.displayName,
           photoURL: user.photoURL,
-          role: "pending",
+          organizations: {},
           createdAt: serverTimestamp(),
         };
         await setDoc(userRef, newProfile);
-        setUserProfile(newProfile);
+        await processPendingInvitations(user);
+        const updatedSnap = await getDoc(userRef);
+        setUserProfile(updatedSnap.exists() ? updatedSnap.data() : newProfile);
       } else {
-        setUserProfile(userSnap.data());
+        await processPendingInvitations(user);
+        const updatedSnap = await getDoc(userRef);
+        setUserProfile(updatedSnap.data());
       }
     } catch (error) {
       console.error("Login failed:", error);
@@ -49,16 +83,16 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
+        processPendingInvitations(user).catch(console.error);
         const userRef = doc(db, "users", user.uid);
-        // Real-time listener for user profile
         const unsubProfile = onSnapshot(userRef, (docSnap) => {
           if (docSnap.exists()) {
             setUserProfile(docSnap.data());
           }
-           setLoading(false);
+          setLoading(false);
         }, (error) => {
           console.error("Error listening to user profile:", error);
           setLoading(false);
