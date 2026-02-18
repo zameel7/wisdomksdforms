@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [showSettings, setShowSettings] = useState(false);
   const [forms, setForms] = useState([]);
   const [formsLoading, setFormsLoading] = useState(false);
+  const [copiedFormId, setCopiedFormId] = useState(null);
 
   // Fetch forms when currentOrg changes
   useEffect(() => {
@@ -93,6 +94,38 @@ export default function Dashboard() {
       }
   }
 
+  const copyFormLink = (form) => {
+    const url = `${window.location.origin}/${currentOrg.slug}/${form.slug}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedFormId(form.id);
+      setTimeout(() => setCopiedFormId(null), 2000);
+    }).catch(() => alert("Failed to copy"));
+  };
+
+  const CopyIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+
+  const DataIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  );
+
+  const DeleteIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      <line x1="10" y1="11" x2="10" y2="17" />
+      <line x1="14" y1="11" x2="14" y2="17" />
+    </svg>
+  );
+
   const FormIcon = () => (
     <svg className="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -125,7 +158,10 @@ export default function Dashboard() {
             <button className="btn btn-secondary" onClick={() => setShowCreateOrg(true)}>+ New Org</button>
           )}
           {showOrgAdminActions && (
-            <button className="btn btn-secondary" onClick={() => setShowSettings(true)}>Settings</button>
+            <>
+              <button className="btn btn-secondary" onClick={() => navigate('/team', { state: currentOrg ? { orgId: currentOrg.id } : {} })}>Team</button>
+              <button className="btn btn-secondary" onClick={() => setShowSettings(true)}>Settings</button>
+            </>
           )}
           <button className="btn btn-ghost" onClick={handleLogout}>Logout</button>
         </div>
@@ -184,10 +220,19 @@ export default function Dashboard() {
                       </span>
                     </div>
                     <div className="form-card-actions">
-                      <a href={`/${currentOrg.slug}/${form.slug}`} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.875rem' }}>View</a>
+                      <button className="btn btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }} onClick={() => copyFormLink(form)} title="Copy form link">
+                        <CopyIcon />
+                        {copiedFormId === form.id ? "Copied!" : "Copy link"}
+                      </button>
                       <button className="btn btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.875rem' }} onClick={() => navigate(`/builder?id=${form.id}`)}>Edit</button>
-                      <button className="btn btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.875rem', color: '#6366f1' }} onClick={() => navigate(`/responses/${form.id}`)}>Data</button>
-                      <button className="btn btn-ghost" style={{ padding: '0.5rem', fontSize: '0.875rem', color: '#ef4444' }} onClick={() => deleteForm(form.id)}>Del</button>
+                      <button className="btn btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.875rem', color: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }} onClick={() => navigate(`/responses/${form.id}`)} title="View responses">
+                        <DataIcon />
+                        Data
+                      </button>
+                      <button className="btn btn-ghost" style={{ padding: '0.5rem', fontSize: '0.875rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.35rem' }} onClick={() => deleteForm(form.id)} title="Delete form">
+                        <DeleteIcon />
+                        Del
+                      </button>
                     </div>
                   </div>
                 ))}

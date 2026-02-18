@@ -8,6 +8,7 @@ import PublicCatalog from "./pages/PublicCatalog";
 
 import PublicFormView from "./pages/PublicFormView";
 import FormResponses from "./pages/FormResponses";
+import Team from "./pages/Team";
 import Migrate from "./pages/Migrate";
 import AdminGuard from "./components/AdminGuard";
 
@@ -40,6 +41,14 @@ function App() {
             element={
               <AdminGuard>
                 <FormResponses />
+              </AdminGuard>
+            } 
+          />
+          <Route 
+            path="/team" 
+            element={
+              <AdminGuard>
+                <Team />
               </AdminGuard>
             } 
           />
