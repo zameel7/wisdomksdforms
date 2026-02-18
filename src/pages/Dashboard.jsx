@@ -93,134 +93,107 @@ export default function Dashboard() {
       }
   }
 
+  const FormIcon = () => (
+    <svg className="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+      <polyline points="10 9 9 9 8 9" />
+    </svg>
+  );
+
   return (
     <div className="container">
-      <header style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: '3rem',
-        paddingBottom: '1rem',
-        borderBottom: '1px solid var(--glass-border)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <img src="/logo.png" alt="Logo" style={{ height: '40px' }} onClick={() => navigate('/')} className="cursor-pointer" />
-          </div>
-          
-          {/* Org Selector */}
+      <header className="dashboard-header">
+        <div className="dashboard-header-left">
+          <img src="/logo.png" alt="Logo" className="dashboard-logo cursor-pointer" onClick={() => navigate('/')} />
           {organizations.length > 1 && (
-             <select 
-               className="input-field" 
-               style={{ width: 'auto', padding: '0.25rem 0.5rem', fontSize: '0.875rem' }}
-               value={currentOrg?.id || ''}
-               onChange={(e) => setCurrentOrg(organizations.find(o => o.id === e.target.value))}
-             >
-                {organizations.map(org => (
-                    <option key={org.id} value={org.id}>{org.name}</option>
-                ))}
-             </select>
+            <select
+              className="input-field dashboard-org-select"
+              value={currentOrg?.id || ''}
+              onChange={(e) => setCurrentOrg(organizations.find(o => o.id === e.target.value))}
+            >
+              {organizations.map(org => (
+                <option key={org.id} value={org.id}>{org.name}</option>
+              ))}
+            </select>
           )}
         </div>
-
-        <div style={{ display: 'flex', gap: '1rem' }}>
-            {canCreateOrg && (
-                <button className="btn" style={{ background: 'rgba(0,0,0,0.05)', fontSize: '0.875rem' }} onClick={() => setShowCreateOrg(true)}>
-                    + New Org
-                </button>
-            )}
-            {showOrgAdminActions && (
-                <button className="btn" style={{ background: 'rgba(0,0,0,0.05)', fontSize: '0.875rem' }} onClick={() => setShowSettings(true)}>
-                    ⚙ Settings
-                </button>
-            )}
-            <button className="btn" onClick={handleLogout} style={{ background: 'rgba(0,0,0,0.05)', fontSize: '0.875rem' }}>
-            Logout
-            </button>
+        <div className="dashboard-header-actions">
+          {canCreateOrg && (
+            <button className="btn btn-secondary" onClick={() => setShowCreateOrg(true)}>+ New Org</button>
+          )}
+          {showOrgAdminActions && (
+            <button className="btn btn-secondary" onClick={() => setShowSettings(true)}>Settings</button>
+          )}
+          <button className="btn btn-ghost" onClick={handleLogout}>Logout</button>
         </div>
       </header>
 
-      <main>
-        {/* Branding Hero Section */}
-        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <img src="/logo.png" alt="Wisdom Logo" style={{ height: '80px', marginBottom: '1.5rem', display: 'block', margin: '0 auto 1.5rem' }} />
-            
-            {/* Breadcrumbs */}
-            <nav style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                gap: '0.75rem', 
-                fontSize: '0.75rem', 
-                color: 'var(--text-muted)', 
-                textTransform: 'uppercase', 
-                letterSpacing: '0.1em',
-                fontWeight: '600'
-            }}>
-                <span className="cursor-pointer" style={{ transition: 'color 0.2s' }} onClick={() => setCurrentOrg(null)}>Dashboard</span>
-                {currentOrg && (
-                    <>
-                        <span style={{ opacity: 0.5 }}>/</span>
-                        <span style={{ color: 'var(--text-main)' }}>{currentOrg.name}</span>
-                    </>
-                )}
-            </nav>
+      <main className="dashboard-main">
+        <div className="dashboard-hero">
+          <h1 className="dashboard-title">{currentOrg?.name || 'Dashboard'}</h1>
+          <nav className="dashboard-breadcrumb">
+            <span className="cursor-pointer" onClick={() => setCurrentOrg(null)}>All organizations</span>
+            {currentOrg && (
+              <>
+                <span className="breadcrumb-sep">/</span>
+                <span>{currentOrg.name}</span>
+              </>
+            )}
+          </nav>
         </div>
 
         {!currentOrg ? (
-            <div className="text-center">
-                <h3>Select an Organization to view forms</h3>
-                {userProfile.role === 'superadmin' && organizations.length === 0 && (
-                     <div className="mt-4">
-                        <p>No organizations found.</p>
-                        <button className="btn btn-primary mt-4" onClick={() => setShowCreateOrg(true)}>Create First Organization</button>
-                     </div>
-                )}
-            </div>
+          <div className="dashboard-select-org">
+            <p className="text-muted">Select an organization above to view and manage forms.</p>
+            {userProfile?.role === 'superadmin' && organizations.length === 0 && (
+              <button className="btn btn-primary mt-4" onClick={() => setShowCreateOrg(true)}>Create First Organization</button>
+            )}
+          </div>
         ) : (
-            <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                    <h3 style={{ fontSize: '1.5rem' }}>Forms</h3>
-                    <button className="btn btn-primary" onClick={() => navigate('/builder')}>
-                        + Create New Form
-                    </button>
-                </div>
-
-                {formsLoading ? (
-                    <div className="text-center text-muted">Loading forms...</div>
-                ) : forms.length === 0 ? (
-                    <div className="glass-panel" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-                        <p style={{ color: 'var(--text-muted)', margin: '1rem 0' }}>No forms found for {currentOrg.name}.</p>
-                    </div>
-                ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                        {forms.map(form => (
-                            <div key={form.id} className="glass-panel p-4" style={{ display: 'flex', flexDirection: 'column' }}>
-                                <div style={{ marginBottom: '1rem', flex: 1 }}>
-                                    <h4 style={{ marginBottom: '0.5rem' }}>{form.title}</h4>
-                                    <p className="text-muted text-sm" style={{ marginBottom: '0.5rem' }}>/{currentOrg.slug}/{form.slug}</p>
-                                    <span style={{ 
-                                        display: 'inline-block', 
-                                        padding: '0.25rem 0.5rem', 
-                                        borderRadius: '4px', 
-                                        fontSize: '0.75rem', 
-                                        background: form.status === 'active' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                                        color: form.status === 'active' ? '#34d399' : '#f87171'
-                                    }}>
-                                        {form.status === 'active' ? 'Published' : 'Draft'}
-                                    </span>
-                                </div>
-                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
-                                    <a href={`/${currentOrg.slug}/${form.slug}`} target="_blank" className="btn" style={{ flex: 1, padding: '0.5rem', fontSize: '0.875rem', background: 'rgba(255,255,255,0.05)', textAlign: 'center' }}>View</a>
-                                    <button className="btn" style={{ flex: 1, padding: '0.5rem', fontSize: '0.875rem', background: 'rgba(255,255,255,0.05)' }} onClick={() => navigate(`/builder?id=${form.id}`)}>Edit</button>
-                                    <button className="btn" style={{ flex: 1, padding: '0.5rem', fontSize: '0.875rem', background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8' }} onClick={() => navigate(`/responses/${form.id}`)}>Data</button>
-                                    <button className="btn" style={{ padding: '0.5rem', fontSize: '0.875rem', background: 'rgba(255,0,0,0.1)', color: '#fda4af' }} onClick={() => deleteForm(form.id)}>Del</button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+          <div className="dashboard-forms-section">
+            <div className="dashboard-forms-header">
+              <h2 className="dashboard-forms-title">Forms</h2>
+              <button className="btn btn-primary" onClick={() => navigate('/builder')}>
+                + Create New Form
+              </button>
             </div>
+
+            {formsLoading ? (
+              <div className="dashboard-loading">Loading forms...</div>
+            ) : forms.length === 0 ? (
+              <div className="empty-state">
+                <FormIcon />
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>No forms yet</h3>
+                <p className="text-muted mb-4">Create your first form to start collecting responses for {currentOrg.name}.</p>
+                <button className="btn btn-primary" onClick={() => navigate('/builder')}>
+                  + Create New Form
+                </button>
+              </div>
+            ) : (
+              <div className="dashboard-forms-grid">
+                {forms.map(form => (
+                  <div key={form.id} className="dashboard-card dashboard-form-card">
+                    <div className="form-card-content">
+                      <h4 className="form-card-title">{form.title}</h4>
+                      <p className="form-card-slug">/{currentOrg.slug}/{form.slug}</p>
+                      <span className={`form-card-status form-card-status--${form.status}`}>
+                        {form.status === 'active' ? 'Published' : 'Draft'}
+                      </span>
+                    </div>
+                    <div className="form-card-actions">
+                      <a href={`/${currentOrg.slug}/${form.slug}`} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.875rem' }}>View</a>
+                      <button className="btn btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.875rem' }} onClick={() => navigate(`/builder?id=${form.id}`)}>Edit</button>
+                      <button className="btn btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.875rem', color: '#6366f1' }} onClick={() => navigate(`/responses/${form.id}`)}>Data</button>
+                      <button className="btn btn-ghost" style={{ padding: '0.5rem', fontSize: '0.875rem', color: '#ef4444' }} onClick={() => deleteForm(form.id)}>Del</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </main>
 
