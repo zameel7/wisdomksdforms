@@ -1,9 +1,16 @@
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function WaitingApproval() {
   const { logout, userProfile } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (userProfile && (userProfile.role === 'admin' || userProfile.role === 'superadmin')) {
+        navigate('/dashboard');
+    }
+  }, [userProfile, navigate]);
 
   const handleLogout = async () => {
     await logout();

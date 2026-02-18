@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { db } from "../firebase";
-import { collection, query, where, getDocs, addDoc, serverTimestamp, documentId } from "firebase/firestore";
+import { collection, query, where, getDocs, addDoc, serverTimestamp, documentId, doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { useAuth } from "../contexts/AuthContext";
 
 export function useOrganizations() {
@@ -51,17 +51,33 @@ export function useOrganizations() {
 
   const createOrganization = async (name, slug) => {
     try {
-      if (userProfile.role !== 'superadmin') throw new Error("Unauthorized");
+      if (userProfile.role !== 'superadmin' && userProfile.role !== 'admin') throw new Error("Unauthorized");
       
       const newOrg = {
         name,
         slug,
+        createdBy: userProfile.uid,
         createdAt: serverTimestamp()
       };
       
       const docRef = await addDoc(collection(db, "organizations"), newOrg);
       const createdOrg = { id: docRef.id, ...newOrg };
-      setOrganizations([...organizations, createdOrg]);
+
+      // If user is admin (not superadmin), add this org to their profile
+      if (userProfile.role === 'admin') {
+          const userRef = doc(db, "users", userProfile.uid);
+          await updateDoc(userRef, {
+              organizationIds: arrayUnion(docRef.id)
+          });
+          // Note: AuthContext onSnapshot will automatically update userProfile, 
+          // triggering re-fetch of organizations in useEffect.
+      }
+      
+      // For superadmin, or just immediate feedback, we can update local state, 
+      // but useEffect will likely handle it via userProfile update or just re-fetch.
+      // However, since superadmin queries all orgs, and admin queries by ID,
+      // letting the useEffect handle the list update is safer to avoid duplication.
+      // But we can set currentOrg.
       setCurrentOrg(createdOrg);
       return createdOrg;
     } catch (err) {

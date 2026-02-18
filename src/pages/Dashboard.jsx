@@ -57,14 +57,37 @@ export default function Dashboard() {
   }
 
   // If no organizations (and not superadmin), show empty state
-  if (organizations.length === 0 && userProfile.role !== 'superadmin') {
-     return (
-        <div className="container flex-center" style={{ minHeight: '100vh', flexDirection: 'column' }}>
-            <h2>No Organization Assigned</h2>
-            <p className="text-muted">Please ask the superadmin to assign you to an organization.</p>
-            <button className="btn mt-4" onClick={handleLogout}>Logout</button>
-        </div>
-     )
+  // If no organizations, show create option or empty state
+  if (organizations.length === 0) {
+      if (userProfile.role === 'superadmin' || userProfile.role === 'admin') {
+          return (
+            <div className="container flex-center" style={{ minHeight: '100vh', flexDirection: 'column' }}>
+                <img src="/logo.png" alt="Logo" style={{ height: '60px', marginBottom: '1.5rem' }} />
+                <h2>Welcome to Wisdom Forms</h2>
+                <p className="text-muted mb-4">You don't have any organizations yet.</p>
+                <button className="btn btn-primary" onClick={() => setShowCreateOrg(true)}>
+                    + Create Your First Organization
+                </button>
+                <button className="btn mt-4" style={{ background: 'transparent', color: 'var(--text-muted)' }} onClick={handleLogout}>Logout</button>
+                
+                {showCreateOrg && (
+                    <CreateOrgModal 
+                        onClose={() => setShowCreateOrg(false)} 
+                        onCreate={createOrganization} 
+                    />
+                )}
+            </div>
+          );
+      } else {
+         return (
+            <div className="container flex-center" style={{ minHeight: '100vh', flexDirection: 'column' }}>
+                <img src="/logo.png" alt="Logo" style={{ height: '60px', marginBottom: '1.5rem' }} />
+                <h2>No Organization Assigned</h2>
+                <p className="text-muted">Please ask your administrator to assign you to an organization.</p>
+                <button className="btn mt-4" onClick={handleLogout}>Logout</button>
+            </div>
+         )
+      }
   }
 
   return (
@@ -102,7 +125,7 @@ export default function Dashboard() {
         </div>
 
         <div style={{ display: 'flex', gap: '1rem' }}>
-            {userProfile.role === 'superadmin' && (
+            {(userProfile.role === 'superadmin' || userProfile.role === 'admin') && (
                 <button className="btn" style={{ background: 'rgba(255,255,255,0.1)' }} onClick={() => setShowCreateOrg(true)}>
                     + New Org
                 </button>
