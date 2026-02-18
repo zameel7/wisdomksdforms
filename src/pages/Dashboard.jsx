@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [forms, setForms] = useState([]);
   const [formsLoading, setFormsLoading] = useState(false);
   const [copiedFormId, setCopiedFormId] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Fetch forms when currentOrg changes
   useEffect(() => {
@@ -152,18 +153,36 @@ export default function Dashboard() {
               ))}
             </select>
           )}
+          <button
+            className="dashboard-mobile-menu-btn"
+            onClick={() => setMobileMenuOpen(o => !o)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            )}
+          </button>
         </div>
-        <div className="dashboard-header-actions">
+        <div className={`dashboard-header-actions ${mobileMenuOpen ? 'dashboard-header-actions--open' : ''}`}>
           {canCreateOrg && (
-            <button className="btn btn-secondary" onClick={() => setShowCreateOrg(true)}>+ New Org</button>
+            <button className="btn btn-secondary" onClick={() => { setShowCreateOrg(true); setMobileMenuOpen(false); }}>+ New Org</button>
           )}
           {showOrgAdminActions && (
             <>
-              <button className="btn btn-secondary" onClick={() => navigate('/team', { state: currentOrg ? { orgId: currentOrg.id } : {} })}>Team</button>
-              <button className="btn btn-secondary" onClick={() => setShowSettings(true)}>Settings</button>
+              <button className="btn btn-secondary" onClick={() => { navigate('/team', { state: currentOrg ? { orgId: currentOrg.id } : {} }); setMobileMenuOpen(false); }}>Team</button>
+              <button className="btn btn-secondary" onClick={() => { setShowSettings(true); setMobileMenuOpen(false); }}>Settings</button>
             </>
           )}
-          <button className="btn btn-ghost" onClick={handleLogout}>Logout</button>
+          <button className="btn btn-ghost" onClick={() => { handleLogout(); setMobileMenuOpen(false); }}>Logout</button>
         </div>
       </header>
 
