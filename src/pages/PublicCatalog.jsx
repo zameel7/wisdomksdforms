@@ -61,7 +61,7 @@ export default function PublicCatalog() {
         <h1 style={{ margin: 0, lineHeight: 0 }}>
             <img src="/logo.png" alt="Wisdom Forms Logo" style={{ height: '50px', verticalAlign: 'middle' }} />
         </h1>
-        <Link to="/login" className="btn" style={{ background: 'rgba(255,255,255,0.1)' }}>Admin Login</Link>
+
       </header>
 
       {loading ? (
