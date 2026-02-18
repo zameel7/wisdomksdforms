@@ -39,7 +39,16 @@ service cloud.firestore {
     match /organizations/{orgId} {
       allow read: if true; 
       allow create: if isSuperAdmin() || (isAuthenticated() && getUserData().role == 'admin');
-      allow update: if isSuperAdmin() || isOrgAdmin(orgId);
+      
+      // Allow updates if superadmin OR if user is an admin for this specific org
+      // This covers updating imgbbApiKey or other settings
+      allow update: if isSuperAdmin() || (isAuthenticated() && 
+         getUserData().role == 'admin' && 
+         (
+             // Check if orgId is in the user's assigned organizations
+             orgId in getUserData().organizationIds
+         )
+      );
     }
 
     // Forms

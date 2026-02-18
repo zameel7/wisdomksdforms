@@ -71,24 +71,34 @@ export default function FormBuilder() {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Use img.bb API
+    if (!currentOrg?.imgbbApiKey) {
+        alert("Please configure ImgBB API Key in Organization Settings first.");
+        return;
+    }
+
     const formData = new FormData();
     formData.append("image", file);
-    // Note: In a real app, API key should be in env. Using a placeholder or requesting user to provide.
-    // For now assuming the user provided one or we use a public one (not recommended).
-    // Let's use a prompt or env variable.
-    // Ideally code should use import.meta.env.VITE_IMGBB_API_KEY
-    
-    // Simulating upload for now if no key is present or implementing proper fetch
-    // const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
-    
-    // Placeholder implementation since we don't have the key yet logic in place
-    // const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, { method: 'POST', body: formData });
-    // const data = await res.json();
-    // setLogoUrl(data.data.url);
-    
-    // For this prototype, if no API key, we will alert.
-    alert("Image upload implementation requires a valid ImgBB API Key. Please configure VITE_IMGBB_API_KEY.");
+
+    setLoading(true);
+    try {
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${currentOrg.imgbbApiKey}`, { 
+            method: 'POST', 
+            body: formData 
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            setLogoUrl(data.data.url);
+        } else {
+            console.error("ImgBB Error:", data);
+            alert("Image upload failed: " + (data.error?.message || "Unknown error"));
+        }
+    } catch (error) {
+        console.error("Upload error:", error);
+        alert("Error uploading image");
+    } finally {
+        setLoading(false);
+    }
   };
 
   const saveForm = async () => {
@@ -173,7 +183,7 @@ export default function FormBuilder() {
                     onChange={(e) => setLogoUrl(e.target.value)}
                     placeholder="https://..."
                 />
-                {/* <input type="file" onChange={handleLogoUpload} className="mt-2" /> */}
+                <input type="file" onChange={handleLogoUpload} className="mt-2" />
             </div>
           </div>
           <div className="mt-4 flex items-center gap-2">

@@ -3,6 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useOrganizations } from "../hooks/useOrganizations";
 import { useNavigate } from "react-router-dom";
 import CreateOrgModal from "../components/CreateOrgModal";
+import OrgSettingsModal from "../components/OrgSettingsModal";
 import { collection, query, where, getDocs, deleteDoc, doc, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
 
@@ -11,6 +12,7 @@ export default function Dashboard() {
   const { organizations, currentOrg, setCurrentOrg, loading: orgsLoading, createOrganization } = useOrganizations();
   const navigate = useNavigate();
   const [showCreateOrg, setShowCreateOrg] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [forms, setForms] = useState([]);
   const [formsLoading, setFormsLoading] = useState(false);
 
@@ -127,9 +129,16 @@ export default function Dashboard() {
 
         <div style={{ display: 'flex', gap: '1rem' }}>
             {(userProfile.role === 'superadmin' || userProfile.role === 'admin') && (
-                <button className="btn" style={{ background: 'rgba(255,255,255,0.1)' }} onClick={() => setShowCreateOrg(true)}>
-                    + New Org
-                </button>
+                <>
+                    <button className="btn" style={{ background: 'rgba(255,255,255,0.1)' }} onClick={() => setShowCreateOrg(true)}>
+                        + New Org
+                    </button>
+                    {currentOrg && (
+                        <button className="btn" style={{ background: 'rgba(255,255,255,0.1)' }} onClick={() => setShowSettings(true)}>
+                            ⚙ Settings
+                        </button>
+                    )}
+                </>
             )}
             <button className="btn" onClick={handleLogout} style={{ background: 'rgba(255,255,255,0.1)' }}>
             Logout
@@ -199,6 +208,14 @@ export default function Dashboard() {
         <CreateOrgModal 
             onClose={() => setShowCreateOrg(false)} 
             onCreate={createOrganization} 
+        />
+      )}
+
+      {showSettings && currentOrg && (
+        <OrgSettingsModal 
+            org={currentOrg} 
+            onClose={() => setShowSettings(false)} 
+            onUpdate={(updatedOrg) => setCurrentOrg(updatedOrg)} 
         />
       )}
     </div>
